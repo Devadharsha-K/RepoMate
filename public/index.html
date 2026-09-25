@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RepoMate — your Bob-powered dev partner</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="masthead">
+      <h1>RepoMate</h1>
+      <p class="tagline">Point it at a repo. Get a plain-English map, or a plain-English fix.</p>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="explain" role="tab" aria-selected="true">Understand a repo</button>
+      <button class="tab" data-tab="debug" role="tab" aria-selected="false">Explain a bug</button>
+    </nav>
+
+    <section id="panel-explain" class="panel active">
+      <label for="repoUrl">GitHub repo URL (public)</label>
+      <input id="repoUrl" type="text" placeholder="https://github.com/owner/repo" />
+      <button id="explainBtn" class="primary">Explain this repo</button>
+      <div id="explainStatus" class="status"></div>
+      <pre id="explainOutput" class="output" hidden></pre>
+    </section>
+
+    <section id="panel-debug" class="panel">
+      <label for="errorMessage">Error message / stack trace</label>
+      <textarea id="errorMessage" rows="4" placeholder="TypeError: Cannot read properties of undefined (reading 'token')"></textarea>
+
+      <label for="codeSnippet">Relevant code (paste the function or file)</label>
+      <textarea id="codeSnippet" rows="8" placeholder="function refreshToken(user) { ... }"></textarea>
+
+      <button id="debugBtn" class="primary">Explain this bug</button>
+      <div id="debugStatus" class="status"></div>
+      <pre id="debugOutput" class="output" hidden></pre>
+    </section>
+
+    <footer class="foot">
+      Built for the IBM Bob 2.0 Hackathon.
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
