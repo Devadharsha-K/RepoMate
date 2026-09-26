@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="RepoMate — paste a GitHub repo URL for a plain-English explanation, or paste an error for a plain-English fix." />
   <title>RepoMate — your Bob-powered dev partner</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -18,24 +19,46 @@
       <button class="tab" data-tab="debug" role="tab" aria-selected="false">Explain a bug</button>
     </nav>
 
+    <!-- ── Tab 1: Understand a repo ───────────────────────────────── -->
     <section id="panel-explain" class="panel active">
-      <label for="repoUrl">GitHub repo URL (public)</label>
-      <input id="repoUrl" type="text" placeholder="https://github.com/owner/repo" />
-      <button id="explainBtn" class="primary">Explain this repo</button>
-      <div id="explainStatus" class="status"></div>
-      <pre id="explainOutput" class="output" hidden></pre>
+      <label for="repoUrl">GitHub repo URL <span class="label-hint">(public repos only)</span></label>
+      <input id="repoUrl" type="text" placeholder="https://github.com/owner/repo"
+             autocomplete="off" spellcheck="false" />
+      <button id="explainBtn" class="primary">
+        <span class="btn-text">Explain this repo</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+
+      <div id="explainStatus" class="status" role="status" aria-live="polite"></div>
+
+      <div id="explainResult" class="result-card" hidden>
+        <div class="result-meta">
+          <span class="badge" id="explainBadge"></span>
+        </div>
+        <pre id="explainOutput" class="output"></pre>
+      </div>
     </section>
 
+    <!-- ── Tab 2: Explain a bug ───────────────────────────────────── -->
     <section id="panel-debug" class="panel">
-      <label for="errorMessage">Error message / stack trace</label>
-      <textarea id="errorMessage" rows="4" placeholder="TypeError: Cannot read properties of undefined (reading 'token')"></textarea>
+      <label for="errorMessage">Error message / stack trace <span class="label-hint">(required)</span></label>
+      <textarea id="errorMessage" rows="4"
+                placeholder="TypeError: Cannot read properties of undefined (reading 'token')"></textarea>
 
-      <label for="codeSnippet">Relevant code (paste the function or file)</label>
-      <textarea id="codeSnippet" rows="8" placeholder="function refreshToken(user) { ... }"></textarea>
+      <label for="codeSnippet">Relevant code <span class="label-hint">(optional — paste the function or file)</span></label>
+      <textarea id="codeSnippet" rows="8"
+                placeholder="function refreshToken(user) { ... }"></textarea>
 
-      <button id="debugBtn" class="primary">Explain this bug</button>
-      <div id="debugStatus" class="status"></div>
-      <pre id="debugOutput" class="output" hidden></pre>
+      <button id="debugBtn" class="primary">
+        <span class="btn-text">Explain this bug</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+
+      <div id="debugStatus" class="status" role="status" aria-live="polite"></div>
+
+      <div id="debugResult" class="result-card" hidden>
+        <pre id="debugOutput" class="output"></pre>
+      </div>
     </section>
 
     <footer class="foot">

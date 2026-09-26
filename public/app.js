@@ -1,8 +1,8 @@
-// --- Tab switching ---
+// ── Tab switching ─────────────────────────────────────────────────────
 const tabs = document.querySelectorAll('.tab');
 const panels = {
   explain: document.getElementById('panel-explain'),
-  debug: document.getElementById('panel-debug'),
+  debug:   document.getElementById('panel-debug'),
 };
 
 tabs.forEach((tab) => {
@@ -19,73 +19,105 @@ tabs.forEach((tab) => {
   });
 });
 
-// --- Repo explainer ---
-const explainBtn = document.getElementById('explainBtn');
+// ── Shared helpers ────────────────────────────────────────────────────
+
+/**
+ * Put a button into a loading state (spinner on, text dimmed, disabled).
+ * Call stopLoading() with the same button to reverse it.
+ */
+function startLoading(btn) {
+  btn.disabled = true;
+  btn.classList.add('loading');
+}
+
+function stopLoading(btn) {
+  btn.disabled = false;
+  btn.classList.remove('loading');
+}
+
+/**
+ * Show a status message. Pass isError=true to colour it red.
+ */
+function setStatus(el, message, isError = false) {
+  el.textContent = message;
+  el.classList.toggle('is-error', isError);
+}
+
+// ── Repo explainer ────────────────────────────────────────────────────
+const explainBtn    = document.getElementById('explainBtn');
 const explainStatus = document.getElementById('explainStatus');
+const explainResult = document.getElementById('explainResult');
 const explainOutput = document.getElementById('explainOutput');
+const explainBadge  = document.getElementById('explainBadge');
 
 explainBtn.addEventListener('click', async () => {
   const repoUrl = document.getElementById('repoUrl').value.trim();
   if (!repoUrl) {
-    explainStatus.textContent = 'Paste a GitHub repo URL first.';
+    setStatus(explainStatus, 'Paste a GitHub repo URL first.', true);
     return;
   }
 
-  explainBtn.disabled = true;
-  explainStatus.textContent = 'Reading the repo and asking Bob...';
-  explainOutput.hidden = true;
+  startLoading(explainBtn);
+  setStatus(explainStatus, 'Reading the repo and asking Bob…');
+  explainResult.hidden = true;
 
   try {
-    const res = await fetch('/api/explain-repo', {
-      method: 'POST',
+    const res  = await fetch('/api/explain-repo', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ repoUrl }),
+      body:    JSON.stringify({ repoUrl }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Something went wrong');
 
-    explainStatus.textContent = `Looked at ${data.filesSeen} files.`;
+    const n = data.filesSeen ?? 0;
+    setStatus(explainStatus, '');
+    explainBadge.textContent = `${n} file${n !== 1 ? 's' : ''} scanned`;
     explainOutput.textContent = data.explanation;
-    explainOutput.hidden = false;
+    explainResult.hidden = false;
   } catch (err) {
-    explainStatus.textContent = `Error: ${err.message}`;
+    setStatus(explainStatus, `Error: ${err.message}`, true);
+    explainResult.hidden = true;
   } finally {
-    explainBtn.disabled = false;
+    stopLoading(explainBtn);
   }
 });
 
-// --- Bug explainer ---
-const debugBtn = document.getElementById('debugBtn');
+// ── Bug explainer ─────────────────────────────────────────────────────
+const debugBtn    = document.getElementById('debugBtn');
 const debugStatus = document.getElementById('debugStatus');
+const debugResult = document.getElementById('debugResult');
 const debugOutput = document.getElementById('debugOutput');
 
 debugBtn.addEventListener('click', async () => {
   const errorMessage = document.getElementById('errorMessage').value.trim();
-  const code = document.getElementById('codeSnippet').value.trim();
+  const code         = document.getElementById('codeSnippet').value.trim();
+
   if (!errorMessage) {
-    debugStatus.textContent = 'Paste an error message first.';
+    setStatus(debugStatus, 'Paste an error message first.', true);
     return;
   }
 
-  debugBtn.disabled = true;
-  debugStatus.textContent = 'Asking Bob...';
-  debugOutput.hidden = true;
+  startLoading(debugBtn);
+  setStatus(debugStatus, 'Asking Bob…');
+  debugResult.hidden = true;
 
   try {
-    const res = await fetch('/api/debug-bug', {
-      method: 'POST',
+    const res  = await fetch('/api/debug-bug', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ errorMessage, code }),
+      body:    JSON.stringify({ errorMessage, code }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Something went wrong');
 
-    debugStatus.textContent = 'Done.';
+    setStatus(debugStatus, '');
     debugOutput.textContent = data.analysis;
-    debugOutput.hidden = false;
+    debugResult.hidden = false;
   } catch (err) {
-    debugStatus.textContent = `Error: ${err.message}`;
+    setStatus(debugStatus, `Error: ${err.message}`, true);
+    debugResult.hidden = true;
   } finally {
-    debugBtn.disabled = false;
+    stopLoading(debugBtn);
   }
 });

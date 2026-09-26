@@ -1,0 +1,21 @@
+# Dependencies — reinstalled inside the image by npm ci
+node_modules
+
+# Git history — not needed in the image
+.git
+.gitignore
+
+# Local environment file — secrets must never be baked into the image.
+# Supply BOB_API_KEY, BOB_API_URL, and GITHUB_TOKEN at runtime via
+# docker run -e / docker-compose env_file or environment: block.
+.env
+.env.*
+!.env.example
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.log
+
+# README files (nice to have locally, not needed at runtime)
+*.md
