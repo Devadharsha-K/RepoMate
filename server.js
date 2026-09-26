@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
 
@@ -157,31 +158,25 @@ async function fetchRepoContext(repoUrl) {
   return { owner, repo, filePaths, readme: readme.slice(0, 4000), fileContents };
 }
 
-// ---------------------------------------------------------------------
-// PLACEHOLDER for the real Bob 2.0 API call.
-// Swap the body of this function once you have Bob's real endpoint,
-// SDK, and API key from tonight's kickoff. Everything else in this
-// file (the two routes below) can stay exactly as it is.
-// ---------------------------------------------------------------------
-async function askBob(prompt) {
-  // --- Example of what the real call will probably look like ---
-  // const res = await fetch(`${process.env.BOB_API_URL}/chat`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${process.env.BOB_API_KEY}`,
-  //   },
-  //   body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }),
-  // });
-  // const data = await res.json();
-  // return data.reply; // <- adjust this line to match Bob's real response shape
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-  return (
-    `[PLACEHOLDER - Bob 2.0 is not connected yet]\n\n` +
-    `This is the exact prompt that will be sent to Bob once we plug in the real API:\n\n` +
-    prompt.slice(0, 600) +
-    (prompt.length > 600 ? '\n...(truncated)' : '')
-  );
+async function askBob(prompt) {
+  const RETRYABLE = new Set([429, 500, 503]);
+  const MAX_ATTEMPTS = 3;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const response = await genAI.models.generateContent({
+        model: 'gemini-flash-latest',
+        contents: prompt,
+      });
+      return response.text;
+    } catch (err) {
+      const retryable = RETRYABLE.has(err.status);
+      if (!retryable || attempt === MAX_ATTEMPTS) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** (attempt - 1)));
+    }
+  }
 }
 
 // ---------------------------------------------------------------------
